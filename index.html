@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+ <meta charset="UTF-8" />
+ <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+ <title>Top Pressing | Quick Order</title>
+ <style>
+ :root{
+  --bg: #e0f2fe; /* Light sky blue background */
+  --card: #bae6fd; /* Medium light blue accent card */
+  --text-color: #0369a1; /* Clean Dark Blue */
+  --muted: #0c4a6e;
+  --primary: #0284c7; /* Deep sky blue primary */
+  --primary-dark: #0369a1;
+  --radius: 12px;
+  --shadow: 0 6px 18px rgba(9,30,63,0.08);
+  --max-width: 450px; /* Centered narrow container card look */
+  --transition: 200ms cubic-bezier(.2,.9,.3,1);
+  --font-sans: "Inter", "Poppins", system-ui, -apple-system, sans-serif;
+ }
+ body {
+  margin: 0;
+  font-family: var(--font-sans);
+  background: linear-gradient(180deg, var(--bg), #f0fbfb 100%);
+  color: #0f1724;
+  line-height: 1.45;
+  padding: 40px 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 100vh;
+ }
+ .container {
+  width: 100%;
+  max-width: var(--max-width);
+  margin: 0 auto;
+ }
+ /* ======================================= LOGO SECTION ======================================= */
+ .logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  font-weight: 700;
+  margin-bottom: 30px;
+ }
+ .logo-img {
+  width: 90px;
+  height: 90px;
+  background-color: var(--primary);
+  padding: 8px;
+  border-radius: 20px;
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+ }
+ .logo-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: 14px;
+ }
+ .logo-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+ }
+ .logo-text .en { font-size: 1.4rem; font-weight: 700; color: #0369a1; }
+ .logo-text .ar { font-size: 1.1rem; font-weight: 700; color: #0284c7; direction: rtl; font-family: sans-serif; }
+ /* ======================================= SIDEBAR & ORDER CARD ======================================= */
+ .order {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+  margin-bottom: 1.5rem;
+ }
+ .kicker {
+  font-size: 1.1rem;
+  color: var(--text-color);
+  font-weight: 700;
+  margin-bottom: 15px;
+ }
+ .form-row { display: flex; gap: .6rem; margin-bottom: .6rem; }
+ .input, .select {
+  width: 100%;
+  padding: .75rem;
+  border-radius: 8px;
+  border: 1px solid #bae6fd;
+  background: #f0f9ff;
+  outline: none;
+  font-size: .95rem;
+  color: black;
+  font-family: inherit;
+ }
+ .input:focus, .select:focus {
+  box-shadow: 0 4px 16px rgba(2,132,199,0.1);
+  border-color: var(--primary);
+ }
+ .btn {
+  background: #0284c7;
+  color: white;
+  border: none;
+  padding: .75rem 1.25rem;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  width: 100%;
+ }
+ .btn:hover { transform: translateY(-2px); background: var(--primary-dark); }
+ .btn.secondary {
+  background: #bae6fd;
+  color: #0369a1;
+ }
+ .btn.secondary:hover {
+  background: #93c5fd;
+ }
+ .loader {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 3px solid rgba(0,0,0,0.06);
+  border-top-color: var(--primary);
+  animation: spin 1s linear infinite;
+  display: none;
+ }
+ .current-list-item {
+  font-size: 0.85rem;
+  background: #f1f5f9;
+  padding: 6px 10px;
+  border-radius: 6px;
+  margin-bottom: 5px;
+  display: flex;
+  justify-content: space-between;
+ }
+ .receipt-item {
+  background: #f8fafc;
+  border-left: 4px solid var(--primary);
+  padding: 10px;
+  margin-bottom: 10px;
+  border-radius: 6px;
+  border: 1px solid #e2e8f0;
+  border-left-width: 4px;
+ }
+ .receipt-time { font-size: 0.75rem; color: #64748b; margin-top: 4px; display: block; }
+ .receipt-sub-item {
+  font-size: 0.8rem;
+  color: #475569;
+  padding-left: 10px;
+  display: block;
+ }
+ @keyframes spin { to { transform: rotate(360deg); } }
+ </style>
+</head>
+<body>
+ <div class="container">
+   <!-- EMBEDDED LOGO PART -->
+   <div class="logo">
+    <div class="logo-img">
+     <img src="Top P.png" alt="Company Logo">
+    </div>
+    <div class="logo-text">
+     <span class="en">Top Pressing</span>
+     <span class="ar">توب ابريسينك</span>
+    </div>
+   </div>
+   <!-- ORDER AND HISTORY CONTAINER PARTS -->
+   <aside class="sidebar">
+    <div class="order">
+     <div class="kicker">Quick Order</div>
+     
+     <!-- ITEM ADDER SUB-FORM -->
+     <div class="form-row">
+       <input class="input" id="itemType" placeholder="Item type (e.g. Shirt, Short, Dress)">
+     </div>
+     <div class="form-row" style="gap: .4rem;">
+       <select class="select" id="itemQuantity" style="flex: 1;">
+         <option value="1">Qty: 1</option><option value="2">Qty: 2</option>
+         <option value="3">Qty: 3</option><option value="4">Qty: 4</option>
+         <option value="5">Qty: 5</option><option value="6">Qty: 6</option>
+         <option value="7">Qty: 7</option><option value="8">Qty: 8</option>
+         <option value="9">Qty: 9</option><option value="10">Qty: 10</option>
+       </select>
+       <input class="input" type="number" id="itemPrice" placeholder="Price (UM)" min="0" style="flex: 1.2;">
+     </div> 
+     <div class="form-row">
+       <button class="btn secondary" id="addItemBtn">+ Add Item to List</button>
+     </div>
+
+     <!-- LIVE BASKET REVIEW BLOCK -->
+     <div id="currentOrderBasket" style="margin: 15px 0; border-top: 1px dashed #bae6fd; padding-top: 10px; display: none;">
+       <div style="font-size: 0.85rem; font-weight: bold; margin-bottom: 8px; color: var(--text-color);">Items in this order:</div>
+       <div id="basketItemsList"></div>
+     </div>
+
+     <div style="display:flex; gap:.6rem; margin-top:.6rem; align-items: center;">
+      <button class="btn cta" id="requestPickupBtn" style="display: none;">Request Pickup</button>
+      <div class="loader" id="orderLoader" aria-hidden="true"></div>
+     </div>
+    </div>
+    
+    <!-- RECEIPT HISTORY PREVIEW SECTION -->
+    <div class="order" style="margin-top: 1.5rem;" id="receiptBox">
+     <div class="kicker">Order History Receipts</div>
+     <div id="receiptHistoryList" style="max-height: 250px; overflow-y: auto; margin-top: 10px; font-size: 0.85rem;">
+      <p style="color: #64748b;">No past orders found.</p>
+     </div>
+    </div>
+   </aside>
+ </div>
+ <script>
+ document.addEventListener("DOMContentLoaded", () => {
+  const itemTypeInput = document.getElementById("itemType");
+  const quantitySelect = document.getElementById("itemQuantity");
+  const priceInput = document.getElementById("itemPrice");
+  const addItemBtn = document.getElementById("addItemBtn");
+  
+  const basketContainer = document.getElementById("currentOrderBasket");
+  const basketList = document.getElementById("basketItemsList");
+  const requestBtn = document.getElementById("requestPickupBtn");
+  const historyContainer = document.getElementById("receiptHistoryList");
+  const loader = document.getElementById("orderLoader");
+
+  // Temporary container storing items added to the current working order active cart
+  let currentCartItems = [];
+
+      function displayReceipts() {
+    const savedOrders = JSON.parse(localStorage.getItem("laundryReceipts")) || [];
+    if (savedOrders.length === 0) {
+      historyContainer.innerHTML = '<p style="color: #64748b;">No past orders found.</p>';
+      return;
+    }
+    
+    let htmlContent = "";
+    
+    // Using a standard loop to guarantee it reads and returns perfectly
+    for (let i = 0; i < savedOrders.length; i++) {
+      const receipt = savedOrders[i];
+      let nestedItemsHtml = "";
+      
+      if (receipt.itemsList && Array.isArray(receipt.itemsList)) {
+        for (let j = 0; j < receipt.itemsList.length; j++) {
+          const item = receipt.itemsList[j];
+          nestedItemsHtml += '<span class="receipt-sub-item" style="display:block; padding-left:10px;">• ' + item.name + ' (x' + item.qty + ') - ' + item.totalItemPrice + ' UM</span>';
+        }
+      }
+      
+      htmlContent += ' <div class="receipt-item" style="background:#f8fafc; border-left:4px solid #0284c7; padding:10px; margin-bottom:10px; border-radius:6px; border:1px solid #e2e8f0; border-left-width:4px;">' +
+                     '<strong>🧾 Order #' + receipt.id + '</strong><br>' +
+                     nestedItemsHtml +
+                     '<strong style="display:block; margin-top:5px;">Total Order Cost: ' + receipt.totalOrderPrice + ' UM</strong>' +
+                     '<span class="receipt-time" style="font-size:0.75rem; color:#64748b; display:block; margin-top:4px;">📅 ' + receipt.dateTime + '</span>' +
+                     '</div>';
+    }
+    
+    historyContainer.innerHTML = htmlContent;
+  }
+
+
+
+  // Action to add an individual item item row to the temporary list basket array
+  addItemBtn.addEventListener("click", () => {
+    const nameValue = itemTypeInput.value.trim();
+    const qtyValue = parseInt(quantitySelect.value);
+    const rateValue = parseFloat(priceInput.value);
+
+    if (!nameValue) {
+      alert("Please enter the item name (e.g. Shirt).");
+      return;
+    }
+    if (isNaN(rateValue) || rateValue < 0) {
+      alert("Please enter a valid price amount.");
+      return;
+    }
+
+    // Push item details object to current workspace tray
+    currentCartItems.push({
+      name: nameValue,
+      qty: qtyValue,
+      rate: rateValue,
+      totalItemPrice: rateValue * qtyValue
+    });
+
+    // Render list preview inside form card workspace panel
+    basketContainer.style.display = "block";
+    requestBtn.style.display = "block"; // Show submission button now that items exist
+    
+    basketList.innerHTML = currentCartItems.map((item, idx) => `
+      <div class="current-list-item">
+        <span>${item.name} x${item.qty}</span>
+        <strong>${item.totalItemPrice} UM</strong>
+      </div>
+    `).join('');
+
+    // Flush picker values ready for next item entry
+    itemTypeInput.value = "";
+    priceInput.value = "";
+    quantitySelect.value = "1";
+  });
+
+  // Compile full list package payload and commit calculation matrix arrays straight to disk storage nodes
+  requestBtn.addEventListener("click", () => {
+    if (currentCartItems.length === 0) return;
+
+    loader.style.display = "block";
+    requestBtn.style.opacity = "0.7";
+    requestBtn.disabled = true;
+
+    setTimeout(() => {
+      const now = new Date();
+      const timestamp = now.toLocaleDateString() + ' ' + now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      
+      // Accumulate totals across all nested cart entries automatically
+      const totalOrderPrice = currentCartItems.reduce((sum, item) => sum + item.totalItemPrice, 0);
+      
+      const newOrderPayload = {
+        id: Math.floor(1000 + Math.random() * 9000),
+        itemsList: currentCartItems, // Bundles full item matrix data array inside order
+        totalOrderPrice: totalOrderPrice,
+        dateTime: timestamp
+      };
+      
+      const existingReceipts = JSON.parse(localStorage.getItem("laundryReceipts")) || [];
+      existingReceipts.unshift(newOrderPayload);
+      localStorage.setItem("laundryReceipts", JSON.stringify(existingReceipts));
+      
+      // Clear out active basket workspace parameters completely
+      currentCartItems = [];
+      basketList.innerHTML = "";
+      basketContainer.style.display = "none";
+      
+      loader.style.display = "none";
+      requestBtn.style.opacity = "1";
+      requestBtn.style.display = "none";
+      requestBtn.disabled = false;
+      
+      alert(`Order Placed and Saved Successfully!\nOrder ID: #${newOrderPayload.id}\nTotal Bill: ${newOrderPayload.totalOrderPrice} UM`);
+      displayReceipts();
+    }, 1000);
+  });
+
+  displayReceipts();
+ });
+ </script>
+</body>
+</html>
