@@ -130,11 +130,30 @@
  .current-list-item {
   font-size: 0.85rem;
   background: #f1f5f9;
-  padding: 6px 10px;
+  padding: 8px 10px;
   border-radius: 6px;
   margin-bottom: 5px;
   display: flex;
   justify-content: space-between;
+  align-items: center;
+ }
+ .delete-item-btn {
+  background: #ef4444;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  width: 20px;
+  height: 20px;
+  font-size: 0.75rem;
+  font-weight: bold;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 10px;
+ }
+ .delete-item-btn:hover {
+  background: #dc2626;
  }
  .receipt-item {
   background: #f8fafc;
@@ -174,7 +193,7 @@
      
      <!-- ITEM ADDER SUB-FORM -->
      <div class="form-row">
-       <input class="input" id="itemType" placeholder="Item type (e.g. Shirt, Short, Dress)">
+       <input class="input" id="itemType" placeholder="Item name (e.g. Shirt, Short, Dress)">
      </div>
      <div class="form-row" style="gap: .4rem;">
        <select class="select" id="itemQuantity" style="flex: 1;">
@@ -197,7 +216,7 @@
      </div>
 
      <div style="display:flex; gap:.6rem; margin-top:.6rem; align-items: center;">
-      <button class="btn cta" id="requestPickupBtn" style="display: none;">Request Pickup</button>
+      <button class="btn cta" id="requestPickupBtn" style="display: none; background: #25D366;">🟢 Send via WhatsApp</button>
       <div class="loader" id="orderLoader" aria-hidden="true"></div>
      </div>
     </div>
@@ -211,8 +230,12 @@
     </div>
    </aside>
  </div>
- <script>
+
+  <script>
  document.addEventListener("DOMContentLoaded", () => {
+  // 🌟 CONFIGURATION: Replace this with your exact business phone number (with country code, no + or spaces)
+  const WHATSAPP_NUMBER = "22287751234"; 
+
   const itemTypeInput = document.getElementById("itemType");
   const quantitySelect = document.getElementById("itemQuantity");
   const priceInput = document.getElementById("itemPrice");
@@ -224,19 +247,16 @@
   const historyContainer = document.getElementById("receiptHistoryList");
   const loader = document.getElementById("orderLoader");
 
-  // Temporary container storing items added to the current working order active cart
   let currentCartItems = [];
 
-      function displayReceipts() {
+  function displayReceipts() {
     const savedOrders = JSON.parse(localStorage.getItem("laundryReceipts")) || [];
     if (savedOrders.length === 0) {
-      historyContainer.innerHTML = '<p style="color: #64748b;">No past orders found.</p>';
+      historyContainer.innerHTML = `<p style="color: #64748b;">No past orders found.</p>`;
       return;
     }
     
     let htmlContent = "";
-    
-    // Using a standard loop to guarantee it reads and returns perfectly
     for (let i = 0; i < savedOrders.length; i++) {
       const receipt = savedOrders[i];
       let nestedItemsHtml = "";
@@ -244,31 +264,54 @@
       if (receipt.itemsList && Array.isArray(receipt.itemsList)) {
         for (let j = 0; j < receipt.itemsList.length; j++) {
           const item = receipt.itemsList[j];
-          nestedItemsHtml += '<span class="receipt-sub-item" style="display:block; padding-left:10px;">• ' + item.name + ' (x' + item.qty + ') - ' + item.totalItemPrice + ' UM</span>';
+          nestedItemsHtml += `<span class="receipt-sub-item">• ${item.name} (x${item.qty}) - ${item.totalItemPrice} UM</span>`;
         }
       }
       
-      htmlContent += ' <div class="receipt-item" style="background:#f8fafc; border-left:4px solid #0284c7; padding:10px; margin-bottom:10px; border-radius:6px; border:1px solid #e2e8f0; border-left-width:4px;">' +
-                     '<strong>🧾 Order #' + receipt.id + '</strong><br>' +
-                     nestedItemsHtml +
-                     '<strong style="display:block; margin-top:5px;">Total Order Cost: ' + receipt.totalOrderPrice + ' UM</strong>' +
-                     '<span class="receipt-time" style="font-size:0.75rem; color:#64748b; display:block; margin-top:4px;">📅 ' + receipt.dateTime + '</span>' +
-                     '</div>';
+      htmlContent += `
+        <div class="receipt-item">
+          <strong>🧾 Order #${receipt.id}</strong><br>
+          ${nestedItemsHtml}
+          <strong style="display:block; margin-top:5px;">Total Order Cost: ${receipt.totalOrderPrice} UM</strong>
+          <span class="receipt-time">📅 ${receipt.dateTime}</span>
+        </div>
+      `;
     }
-    
     historyContainer.innerHTML = htmlContent;
   }
 
+  function updateBasketUI() {
+    if (currentCartItems.length === 0) {
+      basketContainer.style.display = "none";
+      requestBtn.style.display = "none";
+      return;
+    }
 
+    basketContainer.style.display = "block";
+    requestBtn.style.display = "block";
+    
+    // Renders item fields along with a working dynamic Delete trigger button
+    basketList.innerHTML = currentCartItems.map((item, idx) => `
+      <div class="current-list-item">
+        <span>${item.name} x${item.qty} (${item.totalItemPrice} UM)</span>
+        <button class="delete-item-btn" onclick="window.deleteBasketItem(${idx})">X</button>
+      </div>
+    `).join('');
+  }
 
-  // Action to add an individual item item row to the temporary list basket array
+  // Exposed globally so inline click actions can find the method safely
+  window.deleteBasketItem = function(index) {
+    currentCartItems.splice(index, 1); // Removes selected row array item element index
+    updateBasketUI();
+  };
+
   addItemBtn.addEventListener("click", () => {
     const nameValue = itemTypeInput.value.trim();
     const qtyValue = parseInt(quantitySelect.value);
     const rateValue = parseFloat(priceInput.value);
 
     if (!nameValue) {
-      alert("Please enter the item name (e.g. Shirt).");
+      alert("Please enter the item name.");
       return;
     }
     if (isNaN(rateValue) || rateValue < 0) {
@@ -276,7 +319,6 @@
       return;
     }
 
-    // Push item details object to current workspace tray
     currentCartItems.push({
       name: nameValue,
       qty: qtyValue,
@@ -284,24 +326,13 @@
       totalItemPrice: rateValue * qtyValue
     });
 
-    // Render list preview inside form card workspace panel
-    basketContainer.style.display = "block";
-    requestBtn.style.display = "block"; // Show submission button now that items exist
-    
-    basketList.innerHTML = currentCartItems.map((item, idx) => `
-      <div class="current-list-item">
-        <span>${item.name} x${item.qty}</span>
-        <strong>${item.totalItemPrice} UM</strong>
-      </div>
-    `).join('');
+    updateBasketUI();
 
-    // Flush picker values ready for next item entry
     itemTypeInput.value = "";
     priceInput.value = "";
     quantitySelect.value = "1";
   });
 
-  // Compile full list package payload and commit calculation matrix arrays straight to disk storage nodes
   requestBtn.addEventListener("click", () => {
     if (currentCartItems.length === 0) return;
 
@@ -312,13 +343,12 @@
     setTimeout(() => {
       const now = new Date();
       const timestamp = now.toLocaleDateString() + ' ' + now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-      
-      // Accumulate totals across all nested cart entries automatically
       const totalOrderPrice = currentCartItems.reduce((sum, item) => sum + item.totalItemPrice, 0);
+      const orderId = Math.floor(1000 + Math.random() * 9000);
       
       const newOrderPayload = {
-        id: Math.floor(1000 + Math.random() * 9000),
-        itemsList: currentCartItems, // Bundles full item matrix data array inside order
+        id: orderId,
+        itemsList: currentCartItems,
         totalOrderPrice: totalOrderPrice,
         dateTime: timestamp
       };
@@ -326,19 +356,37 @@
       const existingReceipts = JSON.parse(localStorage.getItem("laundryReceipts")) || [];
       existingReceipts.unshift(newOrderPayload);
       localStorage.setItem("laundryReceipts", JSON.stringify(existingReceipts));
+
+      // =======================================
+      // GENERATE AUTOMATED WHATSAPP TEXT MESSAGE
+      // =======================================
+      let messageText = `✨ *New Order from Top Pressing* ✨\n`;
+      messageText += `*Order ID:* #${orderId}\n`;
+      messageText += `*Date/Time:* ${timestamp}\n\n`;
+      messageText += `*Items List:*\n`;
       
-      // Clear out active basket workspace parameters completely
+      currentCartItems.forEach(item => {
+        messageText += `• ${item.name} (x${item.qty}) - ${item.totalItemPrice} UM\n`;
+      });
+      
+      messageText += `\n💰 *Total Bill:* ${totalOrderPrice} UM`;
+
+      // Encodes spaces/line breaks safely into a valid web hyperlink path
+      const encodedMessage = encodeURIComponent(messageText);
+      const whatsappUrl = `https://wa.me{WHATSAPP_NUMBER}?text=${encodedMessage}`;
+
+      // Reset application basket tray parameters
       currentCartItems = [];
-      basketList.innerHTML = "";
-      basketContainer.style.display = "none";
+      updateBasketUI();
       
       loader.style.display = "none";
       requestBtn.style.opacity = "1";
-      requestBtn.style.display = "none";
       requestBtn.disabled = false;
       
-      alert(`Order Placed and Saved Successfully!\nOrder ID: #${newOrderPayload.id}\nTotal Bill: ${newOrderPayload.totalOrderPrice} UM`);
       displayReceipts();
+
+      // Launch native user WhatsApp application chat instantly via browser navigation frame 
+      window.open(whatsappUrl, "_blank");
     }, 1000);
   });
 
