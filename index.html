@@ -403,10 +403,10 @@
       messageText += `\n💰 *Total Bill:* ${totalOrderPrice} UM`;
 
       const encodedMessage = encodeURIComponent(messageText);
+      const businessNumber = "17033896623";
+      const whatsappUrl = `https://wa.me/${businessNumber}?text=${encodedMessage}`;
+      window.location.href = whatsappUrl;  
       
-      // FIXED: Added missing forward slash back into web routing builder
-      const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodedMessage}`;
-
       currentCartItems = [];
       updateBasketUI();
       custNameInput.value = "";
