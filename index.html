@@ -247,7 +247,7 @@
   
   document.addEventListener("DOMContentLoaded", () => {
   // 🌟 CONFIGURATION: Fixed phone number format (Numbers only, no spaces or + signs)
-  const WHATSAPP_NUMBER = "7033896623"; 
+  const WHATSAPP_NUMBER = "17033896623"; 
 
   const custNameInput = document.getElementById("custName");
   const custPhoneInput = document.getElementById("custPhone");
@@ -365,53 +365,62 @@
     }
     if (currentCartItems.length === 0) return;
 
-    //  PASTE THIS INSTANT-REDIRECT FUNCTION IN ITS PLACE:
-    const now = new Date();
-    const timestamp = now.toLocaleDateString() + ' ' + now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    const totalOrderPrice = currentCartItems.reduce((sum, item) => sum + item.totalItemPrice, 0);
-    const orderId = Math.floor(1000 + Math.random() * 9000);
-    
-    const newOrderPayload = {
-      id: orderId,
-      customerName: customerName,
-      customerPhone: customerPhone,
-      itemsList: currentCartItems,
-      totalOrderPrice: totalOrderPrice,
-      dateTime: timestamp
-    };
-    
-    const existingReceipts = JSON.parse(localStorage.getItem("laundryReceipts")) || [];
-    existingReceipts.unshift(newOrderPayload);
-    localStorage.setItem("laundryReceipts", JSON.stringify(existingReceipts));
+    loader.style.display = "block";
+    requestBtn.style.opacity = "0.7";
+    requestBtn.disabled = true;
 
-    let messageText = `✨ *New Order from Top Pressing* ✨\n`;
-    messageText += `*Order ID:* #${orderId}\n`;
-    messageText += `*Date/Time:* ${timestamp}\n\n`;
-    messageText += `👤 *Customer Details:*\n`;
-    messageText += `• Name: ${customerName}\n`;
-    messageText += `• Phone: ${customerPhone}\n\n`;
-    messageText += `*Items List:*\n`;
-    
-    currentCartItems.forEach(item => {
-      messageText += `• ${item.name} (x${item.qty}) - ${item.totalItemPrice} UM\n`;
-    });
-    
-    messageText += `\n💰 *Total Bill:* ${totalOrderPrice} UM`;
+    setTimeout(() => {
+      const now = new Date();
+      const timestamp = now.toLocaleDateString() + ' ' + now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      const totalOrderPrice = currentCartItems.reduce((sum, item) => sum + item.totalItemPrice, 0);
+      const orderId = Math.floor(1000 + Math.random() * 9000);
+      
+      const newOrderPayload = {
+        id: orderId,
+        customerName: customerName,
+        customerPhone: customerPhone,
+        itemsList: currentCartItems,
+        totalOrderPrice: totalOrderPrice,
+        dateTime: timestamp
+      };
+      
+      const existingReceipts = JSON.parse(localStorage.getItem("laundryReceipts")) || [];
+      existingReceipts.unshift(newOrderPayload);
+      localStorage.setItem("laundryReceipts", JSON.stringify(existingReceipts));
 
-    const encodedMessage = encodeURIComponent(messageText);
-    const whatsappUrl = "https://wa.me" + WHATSAPP_NUMBER + "?text=" + encodedMessage;
+      let messageText = `✨ *New Order from Top Pressing* ✨\n`;
+      messageText += `*Order ID:* #${orderId}\n`;
+      messageText += `*Date/Time:* ${timestamp}\n\n`;
+      messageText += `👤 *Customer Details:*\n`;
+      messageText += `• Name: ${customerName}\n`;
+      messageText += `• Phone: ${customerPhone}\n\n`;
+      messageText += `*Items List:*\n`;
+      
+      currentCartItems.forEach(item => {
+        messageText += `• ${item.name} (x${item.qty}) - ${item.totalItemPrice} UM\n`;
+      });
+      
+      messageText += `\n💰 *Total Bill:* ${totalOrderPrice} UM`;
 
-    // Reset application form states instantly
-    currentCartItems = [];
-    updateBasketUI();
-    custNameInput.value = "";
-    custPhoneInput.value = "";
-    displayReceipts();
+      const encodedMessage = encodeURIComponent(messageText);
+      
+      // FIXED: Added missing forward slash back into web routing builder
+      const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodedMessage}`;
 
-    // FIXED: Bypasses mobile pop-up blockers completely by using window.location.href
-    window.location.href = whatsappUrl;
+      currentCartItems = [];
+      updateBasketUI();
+      custNameInput.value = "";
+      custPhoneInput.value = "";
+      
+      loader.style.display = "none";
+      requestBtn.style.opacity = "1";
+      requestBtn.disabled = false;
+      
+      displayReceipts();
 
-  })
+      window.open(whatsappUrl, "_blank");
+    }, 1000);
+  });
 
   displayReceipts();
  });
