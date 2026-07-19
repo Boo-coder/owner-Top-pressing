@@ -196,7 +196,7 @@
        <input class="input" id="custName" placeholder="Your Full Name">
      </div>
      <div class="form-row">
-       <input class="input" id="custPhone" placeholder="Your WhatsApp Phone Number" keyboardType="phone-pad">
+       <input class="input" id="custPhone" placeholder="Customer WhatsApp Number (+222...)">
      </div>
 
      <!-- ITEM ADDER SUB-FORM -->
@@ -403,8 +403,8 @@
       messageText += `\n💰 *Total Bill:* ${totalOrderPrice} UM`;
 
       const encodedMessage = encodeURIComponent(messageText);
-      const businessNumber = "17033896623";
-      const whatsappUrl = `https://wa.me/${businessNumber}?text=${encodedMessage}`;
+      const customerWhatsApp = customerPhone.replace(/\D/g, "");
+      const whatsappUrl = `https://wa.me/${customerWhatsApp}?text=${encodedMessage}`;
       window.location.href = whatsappUrl;  
       
       currentCartItems = [];
