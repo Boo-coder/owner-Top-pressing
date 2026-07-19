@@ -364,6 +364,53 @@
       return;
     }
     if (currentCartItems.length === 0) return;
+
+    //  PASTE THIS INSTANT-REDIRECT FUNCTION IN ITS PLACE:
+    const now = new Date();
+    const timestamp = now.toLocaleDateString() + ' ' + now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    const totalOrderPrice = currentCartItems.reduce((sum, item) => sum + item.totalItemPrice, 0);
+    const orderId = Math.floor(1000 + Math.random() * 9000);
+    
+    const newOrderPayload = {
+      id: orderId,
+      customerName: customerName,
+      customerPhone: customerPhone,
+      itemsList: currentCartItems,
+      totalOrderPrice: totalOrderPrice,
+      dateTime: timestamp
+    };
+    
+    const existingReceipts = JSON.parse(localStorage.getItem("laundryReceipts")) || [];
+    existingReceipts.unshift(newOrderPayload);
+    localStorage.setItem("laundryReceipts", JSON.stringify(existingReceipts));
+
+    let messageText = `✨ *New Order from Top Pressing* ✨\n`;
+    messageText += `*Order ID:* #${orderId}\n`;
+    messageText += `*Date/Time:* ${timestamp}\n\n`;
+    messageText += `👤 *Customer Details:*\n`;
+    messageText += `• Name: ${customerName}\n`;
+    messageText += `• Phone: ${customerPhone}\n\n`;
+    messageText += `*Items List:*\n`;
+    
+    currentCartItems.forEach(item => {
+      messageText += `• ${item.name} (x${item.qty}) - ${item.totalItemPrice} UM\n`;
+    });
+    
+    messageText += `\n💰 *Total Bill:* ${totalOrderPrice} UM`;
+
+    const encodedMessage = encodeURIComponent(messageText);
+    const whatsappUrl = "https://wa.me" + WHATSAPP_NUMBER + "?text=" + encodedMessage;
+
+    // Reset application form states instantly
+    currentCartItems = [];
+    updateBasketUI();
+    custNameInput.value = "";
+    custPhoneInput.value = "";
+    displayReceipts();
+
+    // FIXED: Bypasses mobile pop-up blockers completely by using window.location.href
+    window.location.href = whatsappUrl;
+
   })
 
   displayReceipts();
