@@ -191,22 +191,32 @@
     <div class="order">
      <div class="kicker">Quick Order</div>
      
-     <!-- ITEM ADDER SUB-FORM -->
+     <!-- CUSTOMER CONTACT INFO FIELDS -->
      <div class="form-row">
-       <input class="input" id="itemType" placeholder="Item name (e.g. Shirt, Short, Dress)">
+       <input class="input" id="custName" placeholder="Your Full Name">
      </div>
-     <div class="form-row" style="gap: .4rem;">
-       <select class="select" id="itemQuantity" style="flex: 1;">
-         <option value="1">Qty: 1</option><option value="2">Qty: 2</option>
-         <option value="3">Qty: 3</option><option value="4">Qty: 4</option>
-         <option value="5">Qty: 5</option><option value="6">Qty: 6</option>
-         <option value="7">Qty: 7</option><option value="8">Qty: 8</option>
-         <option value="9">Qty: 9</option><option value="10">Qty: 10</option>
-       </select>
-       <input class="input" type="number" id="itemPrice" placeholder="Price (UM)" min="0" style="flex: 1.2;">
-     </div> 
      <div class="form-row">
-       <button class="btn secondary" id="addItemBtn">+ Add Item to List</button>
+       <input class="input" id="custPhone" placeholder="Your WhatsApp Phone Number" keyboardType="phone-pad">
+     </div>
+
+     <!-- ITEM ADDER SUB-FORM -->
+     <div style="border-top: 1px solid #e2e8f0; margin: 15px 0; padding-top: 15px;">
+       <div class="form-row">
+         <input class="input" id="itemType" placeholder="Item name (e.g. Shirt, Short, Dress)">
+       </div>
+       <div class="form-row" style="gap: .4rem;">
+         <select class="select" id="itemQuantity" style="flex: 1;">
+           <option value="1">Qty: 1</option><option value="2">Qty: 2</option>
+           <option value="3">Qty: 3</option><option value="4">Qty: 4</option>
+           <option value="5">Qty: 5</option><option value="6">Qty: 6</option>
+           <option value="7">Qty: 7</option><option value="8">Qty: 8</option>
+           <option value="9">Qty: 9</option><option value="10">Qty: 10</option>
+         </select>
+         <input class="input" type="number" id="itemPrice" placeholder="Price (UM)" min="0" style="flex: 1.2;">
+       </div> 
+       <div class="form-row">
+         <button class="btn secondary" id="addItemBtn">+ Add Item to List</button>
+       </div>
      </div>
 
      <!-- LIVE BASKET REVIEW BLOCK -->
@@ -224,23 +234,36 @@
     <!-- RECEIPT HISTORY PREVIEW SECTION -->
     <div class="order" style="margin-top: 1.5rem;" id="receiptBox">
      <div class="kicker">Order History Receipts</div>
+      <button class="btn secondary" id="clearHistoryBtn" style="background:#fee2e2; color:#ef4444; padding:5px 10px; font-size:0.75rem; margin-bottom:10px; width:auto; border:1px solid #fca5a5;">🗑️ Clear History</button>
      <div id="receiptHistoryList" style="max-height: 250px; overflow-y: auto; margin-top: 10px; font-size: 0.85rem;">
       <p style="color: #64748b;">No past orders found.</p>
      </div>
     </div>
-   </aside>
+   </aside> 
  </div>
+ 
 
-  <script>
- document.addEventListener("DOMContentLoaded", () => {
-  // 🌟 CONFIGURATION: Replace this with your exact business phone number (with country code, no + or spaces)
-  const WHATSAPP_NUMBER = "22287751234"; 
+ <script>
+  
+  document.addEventListener("DOMContentLoaded", () => {
+  // 🌟 CONFIGURATION: Fixed phone number format (Numbers only, no spaces or + signs)
+  const WHATSAPP_NUMBER = "7033896623"; 
 
+  const custNameInput = document.getElementById("custName");
+  const custPhoneInput = document.getElementById("custPhone");
   const itemTypeInput = document.getElementById("itemType");
   const quantitySelect = document.getElementById("itemQuantity");
   const priceInput = document.getElementById("itemPrice");
   const addItemBtn = document.getElementById("addItemBtn");
-  
+  const clearHistoryBtn = document.getElementById("clearHistoryBtn");
+  clearHistoryBtn.addEventListener("click", () => {
+  if (confirm("Are you sure you want to delete all order history receipts?")) {
+    localStorage.removeItem("laundryReceipts");
+    displayReceipts();
+  }
+});
+
+
   const basketContainer = document.getElementById("currentOrderBasket");
   const basketList = document.getElementById("basketItemsList");
   const requestBtn = document.getElementById("requestPickupBtn");
@@ -264,13 +287,14 @@
       if (receipt.itemsList && Array.isArray(receipt.itemsList)) {
         for (let j = 0; j < receipt.itemsList.length; j++) {
           const item = receipt.itemsList[j];
-          nestedItemsHtml += `<span class="receipt-sub-item">• ${item.name} (x${item.qty}) - ${item.totalItemPrice} UM</span>`;
+          nestedItemsHtml += `<span class="receipt-sub-item" style="display:block; padding-left:10px;">• ${item.name} (x${item.qty}) - ${item.totalItemPrice} UM</span>`;
         }
       }
       
       htmlContent += `
         <div class="receipt-item">
           <strong>🧾 Order #${receipt.id}</strong><br>
+          <span style="font-size:0.8rem; color:#475569;">Customer: ${receipt.customerName || 'N/A'}</span><br>
           ${nestedItemsHtml}
           <strong style="display:block; margin-top:5px;">Total Order Cost: ${receipt.totalOrderPrice} UM</strong>
           <span class="receipt-time">📅 ${receipt.dateTime}</span>
@@ -290,7 +314,6 @@
     basketContainer.style.display = "block";
     requestBtn.style.display = "block";
     
-    // Renders item fields along with a working dynamic Delete trigger button
     basketList.innerHTML = currentCartItems.map((item, idx) => `
       <div class="current-list-item">
         <span>${item.name} x${item.qty} (${item.totalItemPrice} UM)</span>
@@ -299,9 +322,8 @@
     `).join('');
   }
 
-  // Exposed globally so inline click actions can find the method safely
   window.deleteBasketItem = function(index) {
-    currentCartItems.splice(index, 1); // Removes selected row array item element index
+    currentCartItems.splice(index, 1);
     updateBasketUI();
   };
 
@@ -334,6 +356,13 @@
   });
 
   requestBtn.addEventListener("click", () => {
+    const customerName = custNameInput.value.trim();
+    const customerPhone = custPhoneInput.value.trim();
+
+    if (!customerName || !customerPhone) {
+      alert("Please fill in your Name and Phone Number before placing the order.");
+      return;
+    }
     if (currentCartItems.length === 0) return;
 
     loader.style.display = "block";
@@ -348,6 +377,8 @@
       
       const newOrderPayload = {
         id: orderId,
+        customerName: customerName,
+        customerPhone: customerPhone,
         itemsList: currentCartItems,
         totalOrderPrice: totalOrderPrice,
         dateTime: timestamp
@@ -357,12 +388,12 @@
       existingReceipts.unshift(newOrderPayload);
       localStorage.setItem("laundryReceipts", JSON.stringify(existingReceipts));
 
-      // =======================================
-      // GENERATE AUTOMATED WHATSAPP TEXT MESSAGE
-      // =======================================
       let messageText = `✨ *New Order from Top Pressing* ✨\n`;
       messageText += `*Order ID:* #${orderId}\n`;
       messageText += `*Date/Time:* ${timestamp}\n\n`;
+      messageText += `👤 *Customer Details:*\n`;
+      messageText += `• Name: ${customerName}\n`;
+      messageText += `• Phone: ${customerPhone}\n\n`;
       messageText += `*Items List:*\n`;
       
       currentCartItems.forEach(item => {
@@ -371,13 +402,15 @@
       
       messageText += `\n💰 *Total Bill:* ${totalOrderPrice} UM`;
 
-      // Encodes spaces/line breaks safely into a valid web hyperlink path
       const encodedMessage = encodeURIComponent(messageText);
-      const whatsappUrl = `https://wa.me{WHATSAPP_NUMBER}?text=${encodedMessage}`;
+      
+      // FIXED: Added missing forward slash back into web routing builder
+      const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodedMessage}`;
 
-      // Reset application basket tray parameters
       currentCartItems = [];
       updateBasketUI();
+      custNameInput.value = "";
+      custPhoneInput.value = "";
       
       loader.style.display = "none";
       requestBtn.style.opacity = "1";
@@ -385,7 +418,6 @@
       
       displayReceipts();
 
-      // Launch native user WhatsApp application chat instantly via browser navigation frame 
       window.open(whatsappUrl, "_blank");
     }, 1000);
   });
