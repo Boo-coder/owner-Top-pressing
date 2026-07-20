@@ -272,10 +272,9 @@
    </aside> 
  </div>
 
+<script>
 
- <script>
-  
- document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", () => {
 
   const custNameInput = document.getElementById("custName");
   const custPhoneInput = document.getElementById("custPhone");
@@ -295,60 +294,78 @@
   const historyContainer = document.getElementById("receiptHistoryList");
   const clearHistoryBtn = document.getElementById("clearHistoryBtn");
 
-  const loader = document.getElementById("orderLoader");
+
+  let currentCartItems = [];
 
 
-  // CREATE QUANTITY 1 - 200
-  for (let i = 1; i <= 200; i++) {
-    const option = document.createElement("option");
+  // =========================
+  // QUANTITY 1 - 200
+  // =========================
+
+  quantitySelect.innerHTML = "";
+
+  for(let i = 1; i <= 200; i++){
+
+    let option = document.createElement("option");
+
     option.value = i;
     option.textContent = `Qty: ${i}`;
+
     quantitySelect.appendChild(option);
+
   }
 
 
-  // AUTO PRICE WHEN SELECTING ITEM
-  itemTypeInput.addEventListener("change", () => {
 
-    const selected = itemTypeInput.options[itemTypeInput.selectedIndex];
-    const price = selected.dataset.price;
+  // =========================
+  // AUTO PRICE
+  // =========================
+
+  itemTypeInput.addEventListener("change",()=>{
+
+    let selected =
+    itemTypeInput.options[itemTypeInput.selectedIndex];
+
+    let price = selected.dataset.price;
 
 
-    if (itemTypeInput.value === "Others") {
+    if(itemTypeInput.value === "Others"){
 
-      customItemInput.style.display = "block";
-      customItemInput.value = "";
-      priceInput.value = "";
+      customItemInput.style.display="block";
+      priceInput.value="";
 
     } else {
 
-      customItemInput.style.display = "none";
-      priceInput.value = price || "";
+      customItemInput.style.display="none";
+      priceInput.value = price;
 
     }
 
   });
 
 
-  let currentCartItems = [];
 
+  // =========================
+  // BASKET DISPLAY
+  // =========================
 
-  function updateBasketUI() {
+  function updateBasketUI(){
 
-    if (currentCartItems.length === 0) {
+    if(currentCartItems.length === 0){
 
-      basketContainer.style.display = "none";
-      requestBtn.style.display = "none";
+      basketContainer.style.display="none";
+      requestBtn.style.display="none";
+
       return;
-
     }
 
 
-    basketContainer.style.display = "block";
-    requestBtn.style.display = "block";
+    basketContainer.style.display="block";
+    requestBtn.style.display="block";
 
 
-    basketList.innerHTML = currentCartItems.map((item,index)=>`
+    basketList.innerHTML =
+    currentCartItems.map((item,index)=>`
 
       <div class="current-list-item">
 
@@ -370,48 +387,61 @@
   }
 
 
+
   window.deleteBasketItem = function(index){
 
     currentCartItems.splice(index,1);
+
     updateBasketUI();
 
   };
 
 
-  // ADD ITEM BUTTON
+
+
+  // =========================
+  // ADD ITEM
+  // =========================
+
   addItemBtn.addEventListener("click",()=>{
 
 
-    let itemName;
+    let name;
 
 
     if(itemTypeInput.value === "Others"){
 
-      itemName = customItemInput.value.trim();
+      name = customItemInput.value.trim();
 
-    }else{
+    } else {
 
-      itemName = itemTypeInput.value;
+      name = itemTypeInput.value;
 
     }
 
 
-    const qty = parseInt(quantitySelect.value);
-    const price = parseFloat(priceInput.value);
+    let qty =
+    parseInt(quantitySelect.value);
+
+
+    let price =
+    parseFloat(priceInput.value);
 
 
 
-    if(!itemName){
+    if(!name){
 
-      alert("Please select or enter an item.");
+      alert("Select an item");
+
       return;
 
     }
 
 
-    if(isNaN(price) || price < 0){
+    if(isNaN(price)){
 
-      alert("Please enter a price.");
+      alert("Enter price");
+
       return;
 
     }
@@ -420,9 +450,12 @@
 
     currentCartItems.push({
 
-      name:itemName,
+      name:name,
+
       qty:qty,
-      totalItemPrice:price * qty
+
+      totalItemPrice:
+      price * qty
 
     });
 
@@ -433,6 +466,7 @@
     itemTypeInput.value="";
     customItemInput.value="";
     customItemInput.style.display="none";
+
     priceInput.value="";
     quantitySelect.value="1";
 
@@ -441,111 +475,299 @@
 
 
 
-  // SEND WHATSAPP RECEIPT
+
+  // =========================
+  // RECEIPT HISTORY SEARCH
+  // =========================
+
+
+  function displayReceipts(search=""){
+
+
+    let receipts =
+    JSON.parse(
+      localStorage.getItem("laundryReceipts")
+    ) || [];
+
+
+
+    let filtered =
+    receipts.filter(r =>
+
+      r.customerName
+      .toLowerCase()
+      .includes(search.toLowerCase())
+
+      ||
+
+      r.customerPhone
+      .includes(search)
+
+    );
+
+
+
+    if(filtered.length===0){
+
+      historyContainer.innerHTML =
+      "<p>No receipts found.</p>";
+
+      return;
+
+    }
+
+
+
+    historyContainer.innerHTML="";
+
+
+
+    filtered.forEach(receipt=>{
+
+
+      let items="";
+
+
+      receipt.itemsList.forEach(item=>{
+
+        items += `
+        <div class="receipt-sub-item">
+        • ${item.name} x${item.qty}
+        - ${item.totalItemPrice} UM
+        </div>
+        `;
+
+      });
+
+
+
+      historyContainer.innerHTML += `
+
+      <div class="receipt-item">
+
+      <strong>
+      🧾 Receipt #${receipt.id}
+      </strong>
+
+      <br>
+
+      ${receipt.customerName}
+
+      <br>
+
+      📱 ${receipt.customerPhone}
+
+      <br><br>
+
+      ${items}
+
+      <strong>
+      Total: ${receipt.totalOrderPrice} UM
+      </strong>
+
+      <span class="receipt-time">
+      ${receipt.dateTime}
+      </span>
+
+
+      </div>
+
+      `;
+
+
+    });
+
+
+  }
+
+
+
+  custNameInput.addEventListener("input",()=>{
+
+    displayReceipts(
+      custNameInput.value
+    );
+
+  });
+
+
+
+  custPhoneInput.addEventListener("input",()=>{
+
+    displayReceipts(
+      custPhoneInput.value
+    );
+
+  });
+
+
+
+
+
+  // =========================
+  // SEND WHATSAPP + SAVE
+  // =========================
+
+
   requestBtn.addEventListener("click",()=>{
 
 
-    const customerName = custNameInput.value.trim();
-    const customerPhone = custPhoneInput.value.trim();
+    const customerName =
+    custNameInput.value.trim();
+
+
+    const customerPhone =
+    custPhoneInput.value.trim();
+
 
 
     if(!customerName || !customerPhone){
 
-      alert("Enter customer name and WhatsApp number.");
-      return;
-
-    }
-
-
-    if(currentCartItems.length===0){
+      alert("Enter customer information");
 
       return;
 
     }
 
 
-    const now = new Date();
 
-    const timestamp =
-    now.toLocaleDateString()+" "+
+    let now=new Date();
+
+
+    let timestamp =
+    now.toLocaleDateString()
+    +" "
+    +
     now.toLocaleTimeString([],{
       hour:"2-digit",
       minute:"2-digit"
     });
 
 
-    const total =
+
+    let total =
     currentCartItems.reduce(
-      (sum,item)=>sum+item.totalItemPrice,
+      (sum,item)=>
+      sum+item.totalItemPrice,
       0
     );
 
 
-    const orderId =
-    Math.floor(1000+Math.random()*9000);
+
+    let orderId =
+    Math.floor(
+      1000+
+      Math.random()*9000
+    );
 
 
 
-    let messageText =
+    let receipt={
+
+      id:orderId,
+
+      customerName,
+
+      customerPhone,
+
+      itemsList:
+      currentCartItems,
+
+      totalOrderPrice:
+      total,
+
+      dateTime:
+      timestamp
+
+    };
+
+
+
+    let receipts =
+    JSON.parse(
+      localStorage.getItem("laundryReceipts")
+    ) || [];
+
+
+
+    receipts.unshift(receipt);
+
+
+    localStorage.setItem(
+      "laundryReceipts",
+      JSON.stringify(receipts)
+    );
+
+
+
+    displayReceipts();
+
+
+
+    let message =
 `✨ *Top Pressing Receipt* ✨
 
-*Receipt #${orderId}*
-📅 ${timestamp}
+Receipt #${orderId}
 
-👤 Customer:
+Customer:
 ${customerName}
 
 Items:
 `;
 
 
+
     currentCartItems.forEach(item=>{
 
-      messageText +=
+      message +=
       `• ${item.name} x${item.qty} - ${item.totalItemPrice} UM\n`;
 
     });
 
 
-    messageText +=
-`\n💰 Total: ${total} UM
 
-Thank you for choosing Top Pressing!`;
-
-
-
-    const encodedMessage =
-    encodeURIComponent(messageText);
+    message +=
+`\nTotal: ${total} UM`;
 
 
 
-    const customerWhatsApp =
+    let phone =
     customerPhone.replace(/\D/g,"");
 
 
 
-    const whatsappUrl =
-    `https://wa.me/${customerWhatsApp}?text=${encodedMessage}`;
+    window.location.href =
+    `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
 
-
-    window.location.href = whatsappUrl;
 
 
   });
 
 
 
+
+
+  // =========================
   // CLEAR HISTORY
+  // =========================
+
   clearHistoryBtn.addEventListener("click",()=>{
 
-    localStorage.removeItem("laundryReceipts");
-    historyContainer.innerHTML =
-    `<p>No past orders found.</p>`;
+    localStorage.removeItem(
+      "laundryReceipts"
+    );
+
+    displayReceipts();
 
   });
+
+
+
+  displayReceipts();
 
 
 });
- </script>
+
+</script>
 </body>
 </html>
