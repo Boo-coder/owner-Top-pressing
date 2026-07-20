@@ -202,7 +202,32 @@
      <!-- ITEM ADDER SUB-FORM -->
      <div style="border-top: 1px solid #e2e8f0; margin: 15px 0; padding-top: 15px;">
        <div class="form-row">
-         <input class="input" id="itemType" placeholder="Item name (e.g. Shirt, Short, Dress)">
+         <select class="select" id="itemType">
+  <option value="">Select an item</option>
+  <option value="Veste" data-price="100">Veste - 100 UM</option>
+  <option value="Costume" data-price="150">Costume - 150 UM</option>
+  <option value="Manteau" data-price="60">Manteau - 60 UM</option>
+  <option value="Blouson" data-price="50">Blouson - 50 UM</option>
+  <option value="Pantalon" data-price="40">Pantalon - 40 UM</option>
+  <option value="Chemise" data-price="30">Chemise - 30 UM</option>
+  <option value="Pull over" data-price="40">Pull over - 40 UM</option>
+  <option value="Cravate" data-price="20">Cravate - 20 UM</option>
+  <option value="Boubou" data-price="50">Boubou - 50 UM</option>
+  <option value="Sirwale" data-price="30">Sirwale - 30 UM</option>
+  <option value="Jelabia" data-price="40">Jelabia - 40 UM</option>
+  <option value="Tee-shirt" data-price="20">Tee-shirt - 20 UM</option>
+  <option value="Voile with gome" data-price="30">Voile with gome - 30 UM</option>
+  <option value="Voile without gome" data-price="20">Voile without gome - 20 UM</option>
+  <option value="Pyiama" data-price="20">Pyiama - 20 UM</option>
+  <option value="Robe" data-price="20">Robe - 20 UM</option>
+  <option value="Drap" data-price="50">Drap - 50 UM</option>
+  <option value="Couverture Couchette" data-price="30">Couverture Couchette - 30 UM</option>
+  <option value="Couvre Lit" data-price="200">Couvre Lit - 200 UM</option>
+  <option value="Culotte" data-price="20">Culotte - 20 UM</option>
+  <option value="Nappe - Torchon" data-price="50">Nappe - Torchon - 50 UM</option>
+  <option value="Serviette" data-price="40">Serviette - 40 UM</option>
+  <option value="Others" data-price="">Others</option>
+</select>
        </div>
        <div class="form-row" style="gap: .4rem;">
          <select class="select" id="itemQuantity" style="flex: 1;">
@@ -253,7 +278,23 @@
   const custPhoneInput = document.getElementById("custPhone");
   const itemTypeInput = document.getElementById("itemType");
   const quantitySelect = document.getElementById("itemQuantity");
+  for (let i = 1; i <= 200; i++) {
+  const option = document.createElement("option");
+  option.value = i;
+  option.textContent = `Qty: ${i}`;
+  quantitySelect.appendChild(option);
+}
   const priceInput = document.getElementById("itemPrice");
+  itemTypeInput.addEventListener("change", () => {
+  const selected = itemTypeInput.options[itemTypeInput.selectedIndex];
+  const price = selected.dataset.price;
+
+  if (price !== undefined && price !== "") {
+    priceInput.value = price;
+  } else {
+    priceInput.value = "";
+  }
+});
   const addItemBtn = document.getElementById("addItemBtn");
   const clearHistoryBtn = document.getElementById("clearHistoryBtn");
   clearHistoryBtn.addEventListener("click", () => {
@@ -418,8 +459,7 @@
       
       displayReceipts();
 
-      window.open(whatsappUrl, "_blank");
-    }, 1000);
+    })
   });
 
   displayReceipts();
