@@ -376,33 +376,11 @@ const OWNER_PASSWORD = "Bo26862$$/Top"; // Change this
 loginBtn.addEventListener("click",() => {
 
   if(loginPassword.value === OWNER_PASSWORD){
-
-    loginScreen.style.display="none";
-
-    localStorage.setItem(
-      "topPressingLogin",
-      "true"
-    );
-
+    loginScreen.style.display = "none";
   } else {
-
-    loginError.textContent =
-    "Wrong password";
-
+    loginError.textContent = "Wrong password";
   }
-
 });
-
-
-// Keep logged in after refresh
-
-if(
- localStorage.getItem("topPressingLogin")==="true"
-){
-
- loginScreen.style.display="none";
-
-}
 
 document.addEventListener("DOMContentLoaded", () => {
 
@@ -540,13 +518,9 @@ showAllBtn.addEventListener("click", () => {
   }
 
 
-
   window.deleteBasketItem = function(index){
-
     currentCartItems.splice(index,1);
-
-    updateBasketUI();
-
+    updateBasketUI()
   };
 
 
@@ -561,49 +535,32 @@ showAllBtn.addEventListener("click", () => {
     let name;
 
     if(itemTypeInput.value === "Others"){
-
       name = customItemInput.value.trim();
-
     } else {
-
       name = itemTypeInput.value;
-
     }
 
     let qty = parseInt(quantitySelect.value);
     let price = parseFloat(priceInput.value);
 
     if(!name){
-
       alert("Select an item");
-
       return;
-
     }
 
-
     if(isNaN(price)){
-
       alert("Enter price");
-
       return;
-
     }
 
     currentCartItems.push({
-
       name:name,
-
       qty:qty,
-
       totalItemPrice:
       price * qty
-
     });
 
-
     updateBasketUI();
-
 
     itemTypeInput.value="";
     customItemInput.value="";
@@ -772,7 +729,6 @@ onclick="markAsPaid(${receipt.id})">
     );
 
 
-
     const receipt = {
       id: orderId,
       customerName,
@@ -823,8 +779,7 @@ updateIncomeTracker();
 
     let phone = customerPhone.replace(/\D/g,"");
 
-    window.location.href =
-    `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
+    window.location.href = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
 
   });
 
@@ -882,16 +837,12 @@ clearHistoryBtn.addEventListener("click", () => {
 
   function updateIncomeTracker(){
 
-  let receipts = JSON.parse(
-    localStorage.getItem("laundryReceipts")
-  ) || [];
-
+  let receipts = JSON.parse(localStorage.getItem("laundryReceipts")) || [];
 
   let paidTotal = 0;
   let unpaidTotal = 0;
   let monthlyIncome = 0;
   let yearlyIncome = 0;
-
 
   let now = new Date();
 
