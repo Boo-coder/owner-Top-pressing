@@ -376,11 +376,18 @@ const OWNER_PASSWORD = "Bo26862$$/Top"; // Change this
 loginBtn.addEventListener("click",() => {
 
   if(loginPassword.value === OWNER_PASSWORD){
-    loginScreen.style.display = "none";
+    loginScreen.style.display="none";
   } else {
     loginError.textContent = "Wrong password";
   }
 });
+
+
+// Keep logged in after refresh
+
+if(localStorage.getItem("topPressingLogin") === "true"){
+  loginScreen.style.display = "none";
+}
 
 document.addEventListener("DOMContentLoaded", () => {
 
@@ -400,7 +407,6 @@ showUnpaidBtn.addEventListener("click", () => {
   displayReceipts("", "Unpaid");
 
 });
-
 
 showAllBtn.addEventListener("click", () => {
 
