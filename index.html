@@ -171,10 +171,57 @@
   padding-left: 10px;
   display: block;
  }
+ 
  @keyframes spin { to { transform: rotate(360deg); } }
  </style>
 </head>
 <body>
+  <div id="loginScreen" style="
+  position:fixed;
+  top:0;
+  left:0;
+  width:100%;
+  height:100%;
+  background:#e0f2fe;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  z-index:9999;
+">
+
+  <div style="
+    background:white;
+    padding:30px;
+    border-radius:15px;
+    box-shadow:0 6px 18px rgba(0,0,0,.15);
+    width:300px;
+    text-align:center;
+  ">
+
+    <h2 style="color:#0369a1;">
+      🔒 Owner Login
+    </h2>
+
+    <input
+      id="loginPassword"
+      type="password"
+      placeholder="Enter password"
+      class="input"
+    >
+
+    <button
+      id="loginBtn"
+      class="btn"
+      style="margin-top:15px;"
+    >
+      Login
+    </button>
+
+    <p id="loginError" style="color:red;"></p>
+
+  </div>
+
+</div>
  <div class="container">
    <!-- EMBEDDED LOGO PART -->
    <div class="logo">
@@ -263,6 +310,51 @@
     
     <!-- RECEIPT HISTORY PREVIEW SECTION -->
     <div class="order" style="margin-top: 1.5rem;" id="receiptBox">
+      <!-- INCOME TRACKER -->
+      <div class="order">
+
+  <div class="kicker">
+    💰 Income Tracker
+  </div>
+
+  <button
+    id="showPaidBtn"
+    class="btn"
+    style="background:#22c55e; margin-bottom:10px;"
+  >
+    💰 Paid Orders
+    (<span id="paidTotal">0 UM</span>)
+  </button>
+
+  <button
+    id="showUnpaidBtn"
+    class="btn"
+    style="background:#ef4444; margin-bottom:10px;"
+  >
+    ⏳ Unpaid Orders
+    (<span id="unpaidTotal">0 UM</span>)
+  </button>
+
+  <button
+    id="showAllBtn"
+    class="btn secondary"
+  >
+    📋 Show All Orders
+  </button>
+
+  <hr>
+
+  <p>
+    📅 This Month:
+    <strong id="monthlyIncome">0 UM</strong>
+  </p>
+
+  <p>
+    📆 This Year:
+    <strong id="yearlyIncome">0 UM</strong>
+  </p>
+
+</div>
      <div class="kicker">Order History Receipts</div>
       <button class="btn secondary" id="clearHistoryBtn" style="background:#fee2e2; color:#ef4444; padding:5px 10px; font-size:0.75rem; margin-bottom:10px; width:auto; border:1px solid #fca5a5;">🗑️ Clear History</button>
      <div id="receiptHistoryList" style="max-height: 250px; overflow-y: auto; margin-top: 10px; font-size: 0.85rem;">
@@ -273,8 +365,70 @@
  </div>
 
 <script>
+const loginScreen = document.getElementById("loginScreen");
+const loginPassword = document.getElementById("loginPassword");
+const loginBtn = document.getElementById("loginBtn");
+const loginError = document.getElementById("loginError");
+
+const OWNER_PASSWORD = "Bo26862$$/Top"; // Change this
+
+
+loginBtn.addEventListener("click",() => {
+
+  if(loginPassword.value === OWNER_PASSWORD){
+
+    loginScreen.style.display="none";
+
+    localStorage.setItem(
+      "topPressingLogin",
+      "true"
+    );
+
+  } else {
+
+    loginError.textContent =
+    "Wrong password";
+
+  }
+
+});
+
+
+// Keep logged in after refresh
+
+if(
+ localStorage.getItem("topPressingLogin")==="true"
+){
+
+ loginScreen.style.display="none";
+
+}
 
 document.addEventListener("DOMContentLoaded", () => {
+
+  const showPaidBtn = document.getElementById("showPaidBtn");
+  const showUnpaidBtn = document.getElementById("showUnpaidBtn");
+  const showAllBtn = document.getElementById("showAllBtn");
+
+  showPaidBtn.addEventListener("click", () => {
+
+  displayReceipts("", "Paid");
+
+});
+
+
+showUnpaidBtn.addEventListener("click", () => {
+
+  displayReceipts("", "Unpaid");
+
+});
+
+
+showAllBtn.addEventListener("click", () => {
+
+  displayReceipts();
+
+});
 
   const custNameInput = document.getElementById("custName");
   const custPhoneInput = document.getElementById("custPhone");
@@ -323,8 +477,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   itemTypeInput.addEventListener("change",()=>{
 
-    let selected =
-    itemTypeInput.options[itemTypeInput.selectedIndex];
+    let selected = itemTypeInput.options[itemTypeInput.selectedIndex];
 
     let price = selected.dataset.price;
 
@@ -405,9 +558,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   addItemBtn.addEventListener("click",()=>{
 
-
     let name;
-
 
     if(itemTypeInput.value === "Others"){
 
@@ -419,15 +570,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     }
 
-
-    let qty =
-    parseInt(quantitySelect.value);
-
-
-    let price =
-    parseFloat(priceInput.value);
-
-
+    let qty = parseInt(quantitySelect.value);
+    let price = parseFloat(priceInput.value);
 
     if(!name){
 
@@ -445,8 +589,6 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
 
     }
-
-
 
     currentCartItems.push({
 
@@ -473,60 +615,41 @@ document.addEventListener("DOMContentLoaded", () => {
 
   });
 
-
-
-
   // =========================
   // RECEIPT HISTORY SEARCH
   // =========================
 
 
-  function displayReceipts(search=""){
+  function displayReceipts(search = "", statusFilter = ""){
 
+  let receipts = JSON.parse(localStorage.getItem("laundryReceipts")) || [];
 
-    let receipts =
-    JSON.parse(
-      localStorage.getItem("laundryReceipts")
-    ) || [];
+  let filtered = receipts.filter(receipt => {
 
+    const matchesSearch = receipt.customerName.toLowerCase().includes(search.toLowerCase()) || receipt.customerPhone.includes(search);
+    const matchesStatus =
+      statusFilter === "" ||
+      receipt.paymentStatus === statusFilter;
 
+    return matchesSearch && matchesStatus;
 
-    let filtered =
-    receipts.filter(r =>
+  });
+  
+  if(filtered.length === 0){
 
-      r.customerName
-      .toLowerCase()
-      .includes(search.toLowerCase())
+    historyContainer.innerHTML =
 
-      ||
+    "<p>No receipts found.</p>";
 
-      r.customerPhone
-      .includes(search)
+    return;
 
-    );
-
-
-
-    if(filtered.length===0){
-
-      historyContainer.innerHTML =
-      "<p>No receipts found.</p>";
-
-      return;
-
-    }
-
-
+  }
 
     historyContainer.innerHTML="";
 
-
-
     filtered.forEach(receipt=>{
 
-
       let items="";
-
 
       receipt.itemsList.forEach(item=>{
 
@@ -539,15 +662,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
       });
 
-
-
       historyContainer.innerHTML += `
 
-      <div class="receipt-item">
+        <div class="receipt-item">
 
-      <strong>
-      🧾 Receipt #${receipt.id}
-      </strong>
+        <strong>
+          🧾 Receipt #${receipt.id}
+        </strong>
 
       <br>
 
@@ -561,26 +682,35 @@ document.addEventListener("DOMContentLoaded", () => {
 
       ${items}
 
-      <strong>
-      Total: ${receipt.totalOrderPrice} UM
-      </strong>
+     <strong>Total: ${receipt.totalOrderPrice} UM</strong><br>
 
-      <span class="receipt-time">
-      ${receipt.dateTime}
-      </span>
+<span style="
+font-weight:bold;
+color:${receipt.paymentStatus === "Paid" ? "green" : "red"};
+">
+${receipt.paymentStatus === "Paid" ? "✅ Paid" : "❌ Unpaid"}
+</span>
 
+${receipt.paymentStatus !== "Paid" 
+? `<button 
+class="btn secondary"
+style="margin-top:10px; background:#22c55e; color:white;"
+onclick="markAsPaid(${receipt.id})">
+✅ Mark as Paid
+</button>`
+: ""}
+
+<br>
+
+<span class="receipt-time">
+ 📅 ${receipt.dateTime}
+</span>
 
       </div>
 
       `;
-
-
     });
-
-
   }
-
-
 
   custNameInput.addEventListener("input",()=>{
 
@@ -589,8 +719,6 @@ document.addEventListener("DOMContentLoaded", () => {
     );
 
   });
-
-
 
   custPhoneInput.addEventListener("input",()=>{
 
@@ -611,48 +739,31 @@ document.addEventListener("DOMContentLoaded", () => {
 
   requestBtn.addEventListener("click",()=>{
 
+    const customerName = custNameInput.value.trim();
 
-    const customerName =
-    custNameInput.value.trim();
-
-
-    const customerPhone =
-    custPhoneInput.value.trim();
-
-
+    const customerPhone = custPhoneInput.value.trim();
 
     if(!customerName || !customerPhone){
 
       alert("Enter customer information");
 
       return;
-
     }
 
 
 
     let now=new Date();
 
-
-    let timestamp =
-    now.toLocaleDateString()
-    +" "
-    +
-    now.toLocaleTimeString([],{
+    let timestamp = now.toLocaleDateString() +" " + now.toLocaleTimeString([],{
       hour:"2-digit",
       minute:"2-digit"
     });
 
-
-
-    let total =
-    currentCartItems.reduce(
+    let total = currentCartItems.reduce(
       (sum,item)=>
       sum+item.totalItemPrice,
       0
     );
-
-
 
     let orderId =
     Math.floor(
@@ -662,112 +773,171 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 
-    let receipt={
-
-      id:orderId,
-
+    const receipt = {
+      id: orderId,
       customerName,
-
       customerPhone,
-
-      itemsList:
-      currentCartItems,
-
-      totalOrderPrice:
-      total,
-
-      dateTime:
-      timestamp
-
+      itemsList: currentCartItems,
+      totalOrderPrice: total,
+      dateTime: timestamp,
+      paymentStatus: "Unpaid",
+      paidDate: null
     };
 
 
+    let receipts = JSON.parse(localStorage.getItem("laundryReceipts")) || [];
 
-    let receipts =
-    JSON.parse(
-      localStorage.getItem("laundryReceipts")
-    ) || [];
+    receipts = receipts.map(receipt => {
 
+  if(!receipt.paymentStatus){
+    receipt.paymentStatus = "Unpaid";
+  }
 
+  return receipt;
 
-    receipts.unshift(receipt);
+});
 
+receipts.unshift(receipt);
 
-    localStorage.setItem(
-      "laundryReceipts",
-      JSON.stringify(receipts)
-    );
+localStorage.setItem(
+  "laundryReceipts",
+  JSON.stringify(receipts)
+);
 
-
-
-    displayReceipts();
-
-
-
-    let message =
-`✨ *Top Pressing Receipt* ✨
-
-Receipt #${orderId}
-
-Customer:
-${customerName}
-
-Items:
-`;
+displayReceipts();
+updateIncomeTracker();
 
 
+    let message = `✨ *Top Pressing Receipt* ✨
+
+      Receipt #${orderId}
+      Customer:
+      ${customerName}
+      Items: `;
 
     currentCartItems.forEach(item=>{
-
-      message +=
-      `• ${item.name} x${item.qty} - ${item.totalItemPrice} UM\n`;
-
+      message += `• ${item.name} x${item.qty} - ${item.totalItemPrice} UM\n`;
     });
 
+    message += `\nTotal: ${total} UM`;
 
-
-    message +=
-`\nTotal: ${total} UM`;
-
-
-
-    let phone =
-    customerPhone.replace(/\D/g,"");
-
-
+    let phone = customerPhone.replace(/\D/g,"");
 
     window.location.href =
     `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
 
+  });
 
+    window.markAsPaid = function(orderId){
+
+  let savedOrders = JSON.parse(localStorage.getItem("laundryReceipts")) || [];
+
+  savedOrders = savedOrders.map(order => {
+
+    if(order.id === orderId){
+
+      order.paymentStatus = "Paid";
+      order.paidDate = new Date().toLocaleDateString();
+
+    }
+
+    return order;
 
   });
 
 
-
-
-
-  // =========================
-  // CLEAR HISTORY
-  // =========================
-
-  clearHistoryBtn.addEventListener("click",()=>{
-
-    localStorage.removeItem(
-      "laundryReceipts"
-    );
-
-    displayReceipts();
-
-  });
-
+  localStorage.setItem(
+    "laundryReceipts",
+    JSON.stringify(savedOrders)
+  );
 
 
   displayReceipts();
 
+};
+
+clearHistoryBtn.addEventListener("click", () => {
+
+  const password = prompt("Enter the owner password to delete all order history:");
+
+  if (password !== OWNER_PASSWORD) {
+       alert("❌ Incorrect password. Nothing was deleted.");
+    return;
+  }
+
+  const confirmDelete = confirm("⚠️ Are you sure you want to permanently delete ALL order history?");
+
+  if (!confirmDelete) {
+    return;
+  }
+
+  localStorage.removeItem("laundryReceipts");
+
+  displayReceipts();
+  updateIncomeTracker();
+
+  alert("✅ All order history has been deleted.");
+
+});
+
+  function updateIncomeTracker(){
+
+  let receipts = JSON.parse(
+    localStorage.getItem("laundryReceipts")
+  ) || [];
+
+
+  let paidTotal = 0;
+  let unpaidTotal = 0;
+  let monthlyIncome = 0;
+  let yearlyIncome = 0;
+
+
+  let now = new Date();
+
+  let currentMonth = now.getMonth();
+  let currentYear = now.getFullYear();
+
+
+  receipts.forEach(receipt => {
+
+    if(receipt.paymentStatus === "Paid"){
+
+      paidTotal += receipt.totalOrderPrice;
+
+      let paidDate = new Date(receipt.paidDate);
+
+      if(
+        paidDate.getMonth() === currentMonth &&
+        paidDate.getFullYear() === currentYear
+      ){
+        monthlyIncome += receipt.totalOrderPrice;
+      }
+
+      if(
+        paidDate.getFullYear() === currentYear
+      ){
+        yearlyIncome += receipt.totalOrderPrice;
+      }
+    }
+    else {
+      unpaidTotal += receipt.totalOrderPrice;
+    }
+  });
+
+
+  document.getElementById("paidTotal").textContent = paidTotal + " UM";
+  document.getElementById("unpaidTotal").textContent = unpaidTotal + " UM";
+  document.getElementById("monthlyIncome").textContent = monthlyIncome + " UM";
+  document.getElementById("yearlyIncome").textContent = yearlyIncome + " UM";
+
+}
+  displayReceipts();
+  updateIncomeTracker();
 
 });
 
 </script>
 </body>
 </html>
+
