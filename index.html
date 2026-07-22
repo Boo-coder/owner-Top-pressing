@@ -701,33 +701,26 @@ monthlyIncomeBtn.addEventListener("click", () => {
 
      <strong>Total: ${receipt.totalOrderPrice} UM</strong><br>
 
-<span style="
-font-weight:bold;
-color:${receipt.paymentStatus === "Paid" ? "green" : "red"};
-">
-${receipt.paymentStatus === "Paid" ? "✅ Paid" : "❌ Unpaid"}
-</span>
+    <span style=" font-weight:bold;
+      color:${receipt.paymentStatus === "Paid" ? "green" : "red"};">
+      ${receipt.paymentStatus === "Paid" ? "✅ Paid" : "❌ Unpaid"}
+    </span>
 
-${receipt.paymentStatus !== "Paid" 
-? `<button 
-class="btn secondary"
-style="margin-top:10px; background:#22c55e; color:white;"
-onclick="markAsPaid(${receipt.id})">
-✅ Mark as Paid
-</button>`
-: ""}
+    ${receipt.paymentStatus !== "Paid" ? `<button class="btn secondary" style="margin-top:10px; background:#22c55e; color:white;" onclick="markAsPaid(${receipt.id})">
+      ✅ Mark as Paid
+    </button>`
+    : ""}
 
 <br>
 
-<span class="receipt-time">
- 📅 ${receipt.dateTime}
-</span>
+        <span class="receipt-time">
+          📅 ${receipt.dateTime}
+        </span>
+</div>
 
-      </div>
-
-      `;
-    });
-  }
+         `;
+      });
+    }
    
   function displayReceiptsFromList(receipts){
 
@@ -800,8 +793,6 @@ onclick="markAsPaid(${receipt.id})">
   });
 }
 
-
-
   custNameInput.addEventListener("input",()=>{
 
     displayReceipts(custNameInput.value);
@@ -811,7 +802,6 @@ onclick="markAsPaid(${receipt.id})">
 
     displayReceipts(custPhoneInput.value);
   });
-
 
   requestBtn.addEventListener("click",()=>{
 
@@ -1010,4 +1000,3 @@ clearHistoryBtn.addEventListener("click", () => {
 </script>
 </body>
 </html>
-
