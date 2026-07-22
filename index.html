@@ -381,6 +381,11 @@
 
   <div class="income-periods">
 
+  <button id="dailyIncomeBtn" class="income-period">
+      <span>📅 Today</span>
+      <strong id="dailyIncome">0 UM</strong>
+  </button>
+
   <button id="weeklyIncomeBtn" class="income-period">
     <span>📅 This Week</span>
     <strong id="weeklyIncome">0 UM</strong>
@@ -433,7 +438,10 @@ document.addEventListener("DOMContentLoaded", () => {
   const showPaidBtn = document.getElementById("showPaidBtn");
   const showUnpaidBtn = document.getElementById("showUnpaidBtn");
   const showAllBtn = document.getElementById("showAllBtn");
-
+  const dailyIncomeBtn = document.getElementById("dailyIncomeBtn");
+  const weeklyIncomeBtn = document.getElementById("weeklyIncomeBtn");
+  const monthlyIncomeBtn = document.getElementById("monthlyIncomeBtn");
+  
   showPaidBtn.addEventListener("click", () => {
   displayReceipts("", "Paid");
 });
@@ -447,8 +455,19 @@ showAllBtn.addEventListener("click", () => {
   displayReceipts();
 });
 
-const weeklyIncomeBtn = document.getElementById("weeklyIncomeBtn");
-const monthlyIncomeBtn = document.getElementById("monthlyIncomeBtn");
+dailyIncomeBtn.addEventListener("click",()=>{
+  let now=new Date();
+
+  let receipts=JSON.parse(localStorage.getItem("laundryReceipts"))||[];
+
+  displayReceiptsFromList(receipts.filter(receipt=>{
+    if(receipt.paymentStatus!=="Paid")return false;
+
+    let paidDate=new Date(receipt.paidDate);
+
+    return paidDate.toDateString()===now.toDateString();
+  }));
+});
 
 weeklyIncomeBtn.addEventListener("click", () => {
 
@@ -462,8 +481,7 @@ weeklyIncomeBtn.addEventListener("click", () => {
 
   startOfWeek.setHours(0, 0, 0, 0);
 
-  let receipts =
-    JSON.parse(localStorage.getItem("laundryReceipts")) || [];
+  let receipts = JSON.parse(localStorage.getItem("laundryReceipts")) || [];
 
   let weeklyReceipts = receipts.filter(receipt => {
 
@@ -877,7 +895,7 @@ updateIncomeTracker();
       ${customerName}
       Items: `;
 
-    currentCartItems.forEach(item=>{
+    currentCartItems.forEach(item => {
       message += `• ${item.name} x${item.qty} - ${item.totalItemPrice} UM\n`;
     });
 
@@ -946,6 +964,7 @@ clearHistoryBtn.addEventListener("click", () => {
   let unpaidTotal = 0;
   let weeklyIncome = 0;
   let monthlyIncome = 0;
+  let dailyIncome = 0;
 
   let now = new Date();
 
@@ -963,14 +982,18 @@ clearHistoryBtn.addEventListener("click", () => {
 
   if(receipt.paymentStatus === "Paid"){
 
-    paidTotal += receipt.totalOrderPrice;
+  let paidDate = new Date(receipt.paidDate);
 
-    let paidDate = new Date(receipt.paidDate);
+  if(paidDate.toDateString() === now.toDateString()){
+    dailyIncome += receipt.totalOrderPrice;
+  }
 
-    // THIS WEEK
-    if(paidDate >= startOfWeek){
-      weeklyIncome += receipt.totalOrderPrice;
-    }
+  paidTotal += receipt.totalOrderPrice;
+
+  // THIS WEEK
+  if(paidDate >= startOfWeek){
+    weeklyIncome += receipt.totalOrderPrice;
+  }
 
     // THIS MONTH
     if(
@@ -988,13 +1011,13 @@ clearHistoryBtn.addEventListener("click", () => {
 
   document.getElementById("paidTotal").textContent = paidTotal + " UM";
   document.getElementById("unpaidTotal").textContent = unpaidTotal + " UM";
+  document.getElementById("dailyIncome").textContent = dailyIncome + " UM";
   document.getElementById("weeklyIncome").textContent = weeklyIncome + " UM";
   document.getElementById("monthlyIncome").textContent = monthlyIncome + " UM";
 
 }
   displayReceipts();
   updateIncomeTracker();
-
 });
  
 </script>
