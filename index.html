@@ -171,7 +171,42 @@
   padding-left: 10px;
   display: block;
  }
- 
+ .income-periods {
+  display: flex;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+.income-period {
+  flex: 1;
+  border: none;
+  border-radius: 12px;
+  padding: 12px 8px;
+  background: #f0f9ff;
+  color: #0369a1;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.2s ease;
+  border: 1px solid #bae6fd;
+}
+
+.income-period span {
+  display: block;
+  font-size: 0.8rem;
+  margin-bottom: 5px;
+}
+
+.income-period strong {
+  display: block;
+  font-size: 1rem;
+  color: #0284c7;
+}
+
+.income-period:hover {
+  background: #bae6fd;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(2, 132, 199, 0.15);
+}
  @keyframes spin { to { transform: rotate(360deg); } }
  </style>
 </head>
@@ -344,15 +379,19 @@
 
   <hr>
 
-  <p id="weeklyIncomeBtn" style="cursor:pointer;">
-    📅 This Week:
-    <strong id="weeklyIncome">0 UM</strong>
-  </p>
+  <div class="income-periods">
 
-  <p id="monthlyIncomeBtn" style="cursor:pointer;">
-    📅 This Month:
+  <button id="weeklyIncomeBtn" class="income-period">
+    <span>📅 This Week</span>
+    <strong id="weeklyIncome">0 UM</strong>
+  </button>
+
+  <button id="monthlyIncomeBtn" class="income-period">
+    <span>📅 This Month</span>
     <strong id="monthlyIncome">0 UM</strong>
-  </p>
+  </button>
+
+</div>
 
 </div>
      <div class="kicker">Order History Receipts</div>
