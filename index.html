@@ -344,14 +344,14 @@
 
   <hr>
 
-  <p>
-    📅 This Month:
-    <strong id="monthlyIncome">0 UM</strong>
+  <p id="weeklyIncomeBtn" style="cursor:pointer;">
+    📅 This Week:
+    <strong id="weeklyIncome">0 UM</strong>
   </p>
 
-  <p>
-    📆 This Year:
-    <strong id="yearlyIncome">0 UM</strong>
+  <p id="monthlyIncomeBtn" style="cursor:pointer;">
+    📅 This Month:
+    <strong id="monthlyIncome">0 UM</strong>
   </p>
 
 </div>
@@ -396,21 +396,73 @@ document.addEventListener("DOMContentLoaded", () => {
   const showAllBtn = document.getElementById("showAllBtn");
 
   showPaidBtn.addEventListener("click", () => {
-
   displayReceipts("", "Paid");
-
 });
 
 
 showUnpaidBtn.addEventListener("click", () => {
-
   displayReceipts("", "Unpaid");
-
 });
 
 showAllBtn.addEventListener("click", () => {
-
   displayReceipts();
+});
+
+const weeklyIncomeBtn = document.getElementById("weeklyIncomeBtn");
+const monthlyIncomeBtn = document.getElementById("monthlyIncomeBtn");
+
+weeklyIncomeBtn.addEventListener("click", () => {
+
+  let now = new Date();
+
+  let startOfWeek = new Date(now);
+
+  startOfWeek.setDate(
+    now.getDate() - now.getDay()
+  );
+
+  startOfWeek.setHours(0, 0, 0, 0);
+
+  let receipts =
+    JSON.parse(localStorage.getItem("laundryReceipts")) || [];
+
+  let weeklyReceipts = receipts.filter(receipt => {
+
+    if(receipt.paymentStatus !== "Paid"){
+      return false;
+    }
+
+    let paidDate = new Date(receipt.paidDate);
+
+    return paidDate >= startOfWeek;
+
+  });
+
+  displayReceiptsFromList(weeklyReceipts);
+
+});
+
+monthlyIncomeBtn.addEventListener("click", () => {
+
+  let now = new Date();
+
+  let receipts = JSON.parse(localStorage.getItem("laundryReceipts")) || [];
+
+  let monthlyReceipts = receipts.filter(receipt => {
+
+    if(receipt.paymentStatus !== "Paid"){
+      return false;
+    }
+
+    let paidDate = new Date(receipt.paidDate);
+
+    return (
+      paidDate.getMonth() === now.getMonth() &&
+      paidDate.getFullYear() === now.getFullYear()
+    );
+  });
+
+  displayReceiptsFromList(monthlyReceipts);
 
 });
 
@@ -435,11 +487,6 @@ showAllBtn.addEventListener("click", () => {
 
   let currentCartItems = [];
 
-
-  // =========================
-  // QUANTITY 1 - 200
-  // =========================
-
   quantitySelect.innerHTML = "";
 
   for(let i = 1; i <= 200; i++){
@@ -453,18 +500,10 @@ showAllBtn.addEventListener("click", () => {
 
   }
 
-
-
-  // =========================
-  // AUTO PRICE
-  // =========================
-
   itemTypeInput.addEventListener("change",()=>{
 
     let selected = itemTypeInput.options[itemTypeInput.selectedIndex];
-
     let price = selected.dataset.price;
-
 
     if(itemTypeInput.value === "Others"){
 
@@ -472,34 +511,22 @@ showAllBtn.addEventListener("click", () => {
       priceInput.value="";
 
     } else {
-
       customItemInput.style.display="none";
       priceInput.value = price;
-
     }
-
   });
 
-
-
-  // =========================
-  // BASKET DISPLAY
-  // =========================
 
   function updateBasketUI(){
 
     if(currentCartItems.length === 0){
-
       basketContainer.style.display="none";
       requestBtn.style.display="none";
-
       return;
     }
 
-
     basketContainer.style.display="block";
     requestBtn.style.display="block";
-
 
     basketList.innerHTML =
     currentCartItems.map((item,index)=>`
@@ -528,13 +555,6 @@ showAllBtn.addEventListener("click", () => {
     currentCartItems.splice(index,1);
     updateBasketUI()
   };
-
-
-
-
-  // =========================
-  // ADD ITEM
-  // =========================
 
   addItemBtn.addEventListener("click",()=>{
 
@@ -577,11 +597,6 @@ showAllBtn.addEventListener("click", () => {
 
 
   });
-
-  // =========================
-  // RECEIPT HISTORY SEARCH
-  // =========================
-
 
   function displayReceipts(search = "", statusFilter = ""){
 
@@ -674,48 +689,104 @@ onclick="markAsPaid(${receipt.id})">
       `;
     });
   }
+   
+  function displayReceiptsFromList(receipts){
+
+  if(receipts.length === 0){
+
+    historyContainer.innerHTML =
+      "<p>No receipts found.</p>";
+
+    return;
+
+  }
+
+  historyContainer.innerHTML = "";
+
+  receipts.forEach(receipt => {
+
+    let items = "";
+
+    receipt.itemsList.forEach(item => {
+
+      items += `
+        <div class="receipt-sub-item">
+          • ${item.name} x${item.qty}
+          - ${item.totalItemPrice} UM
+        </div>
+      `;
+
+    });
+
+    historyContainer.innerHTML += `
+
+      <div class="receipt-item">
+
+        <strong>
+          🧾 Receipt #${receipt.id}
+        </strong>
+
+        <br>
+
+        ${receipt.customerName}
+
+        <br>
+
+        📱 ${receipt.customerPhone}
+
+        <br><br>
+
+        ${items}
+
+        <strong>
+          Total: ${receipt.totalOrderPrice} UM
+        </strong>
+
+        <br>
+
+        <span style="font-weight:bold; color:green;">
+          ✅ Paid
+        </span>
+
+        <br>
+
+        <span class="receipt-time">
+          📅 ${receipt.dateTime}
+        </span>
+
+      </div>
+
+    `;
+
+  });
+}
+
+
 
   custNameInput.addEventListener("input",()=>{
 
-    displayReceipts(
-      custNameInput.value
-    );
-
+    displayReceipts(custNameInput.value);
   });
 
   custPhoneInput.addEventListener("input",()=>{
 
-    displayReceipts(
-      custPhoneInput.value
-    );
-
+    displayReceipts(custPhoneInput.value);
   });
-
-
-
-
-
-  // =========================
-  // SEND WHATSAPP + SAVE
-  // =========================
 
 
   requestBtn.addEventListener("click",()=>{
 
     const customerName = custNameInput.value.trim();
-
     const customerPhone = custPhoneInput.value.trim();
 
     if(!customerName || !customerPhone){
-
       alert("Enter customer information");
-
       return;
     }
 
 
 
-    let now=new Date();
+    let now = new Date();
 
     let timestamp = now.toLocaleDateString() +" " + now.toLocaleTimeString([],{
       hour:"2-digit",
@@ -796,16 +867,13 @@ updateIncomeTracker();
   savedOrders = savedOrders.map(order => {
 
     if(order.id === orderId){
-
       order.paymentStatus = "Paid";
-      order.paidDate = new Date().toLocaleDateString();
-
+      order.paidDate = new Date().toISOString();
     }
 
     return order;
 
   });
-
 
   localStorage.setItem(
     "laundryReceipts",
@@ -847,53 +915,59 @@ clearHistoryBtn.addEventListener("click", () => {
 
   let paidTotal = 0;
   let unpaidTotal = 0;
+  let weeklyIncome = 0;
   let monthlyIncome = 0;
-  let yearlyIncome = 0;
 
   let now = new Date();
 
   let currentMonth = now.getMonth();
-  let currentYear = now.getFullYear();
+  let startOfWeek = new Date(now);
+
+  startOfWeek.setDate(
+    now.getDate() - now.getDay()
+  );
+
+  startOfWeek.setHours(0, 0, 0, 0);
 
 
   receipts.forEach(receipt => {
 
-    if(receipt.paymentStatus === "Paid"){
+  if(receipt.paymentStatus === "Paid"){
 
-      paidTotal += receipt.totalOrderPrice;
+    paidTotal += receipt.totalOrderPrice;
 
-      let paidDate = new Date(receipt.paidDate);
+    let paidDate = new Date(receipt.paidDate);
 
-      if(
-        paidDate.getMonth() === currentMonth &&
-        paidDate.getFullYear() === currentYear
-      ){
-        monthlyIncome += receipt.totalOrderPrice;
-      }
-
-      if(
-        paidDate.getFullYear() === currentYear
-      ){
-        yearlyIncome += receipt.totalOrderPrice;
-      }
+    // THIS WEEK
+    if(paidDate >= startOfWeek){
+      weeklyIncome += receipt.totalOrderPrice;
     }
-    else {
-      unpaidTotal += receipt.totalOrderPrice;
+
+    // THIS MONTH
+    if(
+      paidDate.getMonth() === currentMonth &&
+      paidDate.getFullYear() === now.getFullYear()
+    ){
+      monthlyIncome += receipt.totalOrderPrice;
     }
-  });
+  }
+  else {
+    unpaidTotal += receipt.totalOrderPrice;
+  }
+});
 
 
   document.getElementById("paidTotal").textContent = paidTotal + " UM";
   document.getElementById("unpaidTotal").textContent = unpaidTotal + " UM";
+  document.getElementById("weeklyIncome").textContent = weeklyIncome + " UM";
   document.getElementById("monthlyIncome").textContent = monthlyIncome + " UM";
-  document.getElementById("yearlyIncome").textContent = yearlyIncome + " UM";
 
 }
   displayReceipts();
   updateIncomeTracker();
 
 });
-
+ 
 </script>
 </body>
 </html>
