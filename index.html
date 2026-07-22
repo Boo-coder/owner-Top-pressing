@@ -846,11 +846,10 @@ monthlyIncomeBtn.addEventListener("click", () => {
       0
     );
 
-    let orderId =
-    Math.floor(
-      1000+
-      Math.random()*9000
-    );
+    let lastReceiptNumber = parseInt(localStorage.getItem("lastReceiptNumber")) || 37999;
+    let orderId = lastReceiptNumber + 1;
+
+      localStorage.setItem("lastReceiptNumber", orderId);
 
 
     const receipt = {
@@ -863,7 +862,6 @@ monthlyIncomeBtn.addEventListener("click", () => {
       paymentStatus: "Unpaid",
       paidDate: null
     };
-
 
     let receipts = JSON.parse(localStorage.getItem("laundryReceipts")) || [];
 
@@ -1018,6 +1016,7 @@ clearHistoryBtn.addEventListener("click", () => {
 }
   displayReceipts();
   updateIncomeTracker();
+  orderId 
 });
  
 </script>
