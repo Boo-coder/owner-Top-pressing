@@ -454,18 +454,26 @@ showAllBtn.addEventListener("click", () => {
   displayReceipts();
 });
 
-dailyIncomeBtn.addEventListener("click",()=>{
-  let now=new Date();
+dailyIncomeBtn.addEventListener("click", () => {
 
-  let receipts=JSON.parse(localStorage.getItem("laundryReceipts"))||[];
+  let now = new Date();
 
-  displayReceiptsFromList(receipts.filter(receipt=>{
-    if(receipt.paymentStatus!=="Paid")return false;
+  let receipts = JSON.parse(localStorage.getItem("laundryReceipts")) || [];
 
-    let paidDate=new Date(receipt.paidDate);
+  let dailyReceipts = receipts.filter(receipt => {
 
-    return paidDate.toDateString()===now.toDateString();
-  }));
+    if(receipt.paymentStatus !== "Paid"){
+
+      return false;
+    }
+
+    let paidDate = new Date(receipt.paidDate);
+
+    return paidDate.toDateString() === now.toDateString();
+  });
+
+  displayReceiptsFromList(dailyReceipts);
+
 });
 
 weeklyIncomeBtn.addEventListener("click", () => {
@@ -494,7 +502,7 @@ weeklyIncomeBtn.addEventListener("click", () => {
 
   });
 
-  displayReceiptsFromList(weeklyReceipts);
+  displayReceiptsFromList(dailyReceipts);
 
 });
 
