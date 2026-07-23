@@ -502,7 +502,7 @@ weeklyIncomeBtn.addEventListener("click", () => {
 
   });
 
-  displayReceiptsFromList(dailyReceipts);
+  displayReceiptsFromList(weeklyReceipts);
 
 });
 
@@ -853,7 +853,7 @@ monthlyIncomeBtn.addEventListener("click", () => {
       0
     );
 
-    let lastReceiptNumber = parseInt(localStorage.getItem("lastReceiptNumber")) || 37999;
+    let lastReceiptNumber = parseInt(localStorage.getItem("lastReceiptNumber")) || 37950;
     let orderId = lastReceiptNumber + 1;
 
       localStorage.setItem("lastReceiptNumber", orderId);
