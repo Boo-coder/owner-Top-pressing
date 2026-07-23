@@ -414,15 +414,14 @@ const loginPassword = document.getElementById("loginPassword");
 const loginBtn = document.getElementById("loginBtn");
 const loginError = document.getElementById("loginError");
 
-const OWNER_PASSWORD = "Bo26862$$/Top"; // Change this
+const OWNER_PASSWORD = "Bo26862$$/Top";
 
 
 loginBtn.addEventListener("click",() => {
 
   if(loginPassword.value === OWNER_PASSWORD){
-    loginScreen.style.display="none";
-  } else {
-    loginError.textContent = "Wrong password";
+    loginScreen.style.display = "none";
+    localStorage.setItem("topPressingLogin","true");
   }
 });
 
@@ -925,9 +924,8 @@ updateIncomeTracker();
     JSON.stringify(savedOrders)
   );
 
-
   displayReceipts();
-
+  updateIncomeTracker();
 };
 
 clearHistoryBtn.addEventListener("click", () => {
